@@ -22,7 +22,9 @@ from ray.llm._internal.serve.core.server.builder import (
 )
 from ray.llm._internal.serve.core.server.llm_server import LLMServer
 from ray.llm._internal.serve.observability.logging import get_logger
+from ray.serve.config import RequestRouterConfig
 from ray.serve.deployment import Application
+from ray.serve.experimental.round_robin_router import RoundRobinRouter
 
 logger = get_logger(__name__)
 
@@ -37,6 +39,11 @@ def _build_direct_streaming_llm_deployment(llm_config: LLMConfig) -> Application
     return build_llm_deployment(
         llm_config,
         deployment_cls=serve.ingress()(server_cls),
+        override_serve_options={
+            "request_router_config": RequestRouterConfig(
+                request_router_class=RoundRobinRouter,
+            ),
+        },
     )
 
 
